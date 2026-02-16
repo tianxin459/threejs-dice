@@ -203,38 +203,38 @@ function App() {
   const createDots = (dice, dotGeometry) => {
     const darkColor = 0x1e293b
 
-    // Face 1 - 1 dot (RED)
+    // Face 1 - 1 dot (RED) - Front face (+Z)
     createDot(dice, dotGeometry, 0, 0, 1, 0xef4444)
 
-    // Face 2 - 2 dots
+    // Face 6 - 6 dots - Back face (-Z)
     createDot(dice, dotGeometry, -0.5, 0.5, -1, darkColor)
+    createDot(dice, dotGeometry, 0.5, 0.5, -1, darkColor)
+    createDot(dice, dotGeometry, -0.5, -0.5, -1, darkColor)
     createDot(dice, dotGeometry, 0.5, -0.5, -1, darkColor)
+    createDot(dice, dotGeometry, -0.5, 0, -1, darkColor)
+    createDot(dice, dotGeometry, 0.5, 0, -1, darkColor)
 
-    // Face 3 - 3 dots
-    createDot(dice, dotGeometry, 1, -0.5, -0.5, darkColor)
+    // Face 2 - 2 dots - Left face (-X)
+    createDot(dice, dotGeometry, -1, 0.5, -0.5, darkColor)
+    createDot(dice, dotGeometry, -1, -0.5, 0.5, darkColor)
+
+    // Face 5 - 5 dots - Right face (+X)
+    createDot(dice, dotGeometry, 1, 0.5, -0.5, darkColor)
+    createDot(dice, dotGeometry, 1, -0.5, 0.5, darkColor)
     createDot(dice, dotGeometry, 1, 0, 0, darkColor)
     createDot(dice, dotGeometry, 1, 0.5, 0.5, darkColor)
+    createDot(dice, dotGeometry, 1, -0.5, -0.5, darkColor)
 
-    // Face 4 - 4 dots
-    createDot(dice, dotGeometry, -1, -0.5, -0.5, darkColor)
-    createDot(dice, dotGeometry, -1, -0.5, 0.5, darkColor)
-    createDot(dice, dotGeometry, -1, 0.5, -0.5, darkColor)
-    createDot(dice, dotGeometry, -1, 0.5, 0.5, darkColor)
-
-    // Face 5 - 5 dots
-    createDot(dice, dotGeometry, -0.5, 1, -0.5, darkColor)
-    createDot(dice, dotGeometry, 0.5, 1, -0.5, darkColor)
+    // Face 3 - 3 dots - Top face (+Y)
     createDot(dice, dotGeometry, 0, 1, 0, darkColor)
-    createDot(dice, dotGeometry, -0.5, 1, 0.5, darkColor)
+    createDot(dice, dotGeometry, -0.5, 1, -0.5, darkColor)
     createDot(dice, dotGeometry, 0.5, 1, 0.5, darkColor)
 
-    // Face 6 - 6 dots
+    // Face 4 - 4 dots - Bottom face (-Y)
     createDot(dice, dotGeometry, -0.5, -1, -0.5, darkColor)
-    createDot(dice, dotGeometry, 0.5, -1, -0.5, darkColor)
-    createDot(dice, dotGeometry, -0.5, -1, 0, darkColor)
-    createDot(dice, dotGeometry, 0.5, -1, 0, darkColor)
-    createDot(dice, dotGeometry, -0.5, -1, 0.5, darkColor)
     createDot(dice, dotGeometry, 0.5, -1, 0.5, darkColor)
+    createDot(dice, dotGeometry, -0.5, -1, 0.5, darkColor)
+    createDot(dice, dotGeometry, 0.5, -1, -0.5, darkColor)
   }
 
   const animate = () => {
