@@ -256,7 +256,10 @@ function App() {
         const diffY = Math.abs(target.y - dice.rotation.y)
         const diffZ = Math.abs(target.z - dice.rotation.z)
 
+        console.log('Rotation diff:', { x: diffX, y: diffY, z: diffZ })
+
         if (diffX < 0.01 && diffY < 0.01 && diffZ < 0.01) {
+          console.log('Rolling finished')
           setIsRolling(false)
         }
       }
@@ -270,16 +273,23 @@ function App() {
   }
 
   const handleRollDice = () => {
-    if (isRolling) return
+    console.log('Roll clicked, isRolling:', isRolling)
+    if (isRolling) {
+      console.log('Already rolling, ignoring click')
+      return
+    }
 
+    console.log('Starting roll...')
     setIsRolling(true)
 
     const rotations = Math.floor(Math.random() * 3) + 2
-    targetRotationRef.current = {
+    const targetRotation = {
       x: Math.PI * 2 * rotations + Math.floor(Math.random() * 6) * Math.PI / 2,
       y: Math.PI * 2 * rotations + Math.floor(Math.random() * 6) * Math.PI / 2,
       z: Math.PI * 2 * rotations + Math.floor(Math.random() * 6) * Math.PI / 2
     }
+    console.log('Target rotation:', targetRotation)
+    targetRotationRef.current = targetRotation
   }
 
   const handleCopyError = () => {
