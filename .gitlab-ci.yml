@@ -2,16 +2,21 @@ image: node:18
 
 pages:
   stage: deploy
+  before_script:
+    - echo "Configuring npm registry..."
+    - npm config set registry https://registry.npmmirror.com
+    - npm config get registry
   script:
     - node --version
     - npm --version
-    - npm ci --prefer-offline --no-audit
+    - npm install
     - npm run build
     - mv dist public
     - ls -la public
   artifacts:
     paths:
       - public
+    expire_in: 1 week
   cache:
     paths:
       - node_modules/
