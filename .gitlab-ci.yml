@@ -10,6 +10,7 @@ pages:
     - npm --version
   script:
     - node --version
+    - rm -f package-lock.json
     - npm install --legacy-peer-deps
     - npm run build
     - mv dist public
