@@ -6,10 +6,11 @@ pages:
     - echo "Configuring npm registry..."
     - npm config set registry https://registry.npmmirror.com
     - npm config get registry
+    - npm install -g npm@9.9.2
+    - npm --version
   script:
     - node --version
-    - npm --version
-    - npm install
+    - npm install --legacy-peer-deps
     - npm run build
     - mv dist public
     - ls -la public
