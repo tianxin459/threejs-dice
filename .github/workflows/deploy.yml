@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
@@ -13,62 +13,41 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
+    environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        
-    - name: Configure DNS to use Google DNS
+
+    - name: Configure npm registry
       run: |
-        echo "=== DNS Configuration ==="
-        echo "Current DNS servers:"
-        cat /etc/resolv.conf | grep "^nameserver"
-        echo "Using Google DNS (8.8.8.8.8.8)"
-        echo "=== Configure DNS to use Google DNS ==="
-        echo "nameserver 8.8.8.8.8.8.8" | sudo tee -a /etc/resolv.conf.new
-        echo "nameserver 8.8.8.8.8.8.8.8" | sudo tee -a /etc/resolv.conf.new
-        echo "options rotate timeout:2" | sudo tee -a /etc/resolv.conf.new
-        
-        echo "=== Apply new DNS settings ==="
-        sudo service network-manager restart
-        
-    - name: Restore DNS
-      run: |
-        echo "=== Restoring original DNS ==="
-        echo "nameserver 8.8.8.8.8.8.8" | sudo tee -a /etc/resolv.conf
-        echo "nameserver 127.0.0.1" | sudo tee -a /etc/resolv.conf.new
-        
-        echo "=== DNS restored ==="
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
+        echo "Configuring npm registry..."
+        npm config set registry https://registry.npmmirror.com
+        npm config get registry
+
     - name: Install dependencies
-      run: npm install
-      
+      run: |
+        rm -f package-lock.json
+        npm install --legacy-peer-deps
+
     - name: Build
       run: npm run build
-      
+
     - name: Setup Pages
       uses: actions/configure-pages@v5
-      
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: './dist'
-        
+
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
