@@ -239,6 +239,20 @@ function App() {
     createDot(dice, dotGeometry, 0.5, 0, -0.5, darkColor, 'bottom')
   }
 
+  // 获取每个面朝前时的目标旋转角度
+  const getRotationForFace = (face) => {
+    // 面与目标旋转的映射
+    const faceRotations = {
+      1: { x: 0, y: 0, z: 0 },          // Front (+Z)
+      6: { x: Math.PI, y: 0, z: 0 },    // Back (-Z)
+      2: { x: 0, y: Math.PI / 2, z: 0 },  // Left (-X)
+      5: { x: 0, y: -Math.PI / 2, z: 0 }, // Right (+X)
+      3: { x: Math.PI / 2, y: 0, z: 0 }, // Top (+Y)
+      4: { x: -Math.PI / 2, y: 0, z: 0 } // Bottom (-Y)
+    }
+    return faceRotations[face]
+  }
+
   const animate = () => {
     const dice = diceRef.current
     const renderer = rendererRef.current
@@ -284,12 +298,23 @@ function App() {
     console.log('Starting roll...')
     setIsRolling(true)
 
-    const rotations = Math.floor(Math.random() * 3) + 2
+    // 随机选择一个面 (1-6)
+    const face = Math.floor(Math.random() * 6) + 1
+    console.log('Target face:', face)
+
+    // 获取该面朝前的目标旋转
+    const baseRotation = getRotationForFace(face)
+
+    // 添加额外的旋转以产生投掷效果
+    const rotations = Math.floor(Math.random() * 2) + 2 // 2-3 圈
+    const fullRotations = rotations * Math.PI * 2
+
     const targetRotation = {
-      x: Math.PI * 2 * rotations + Math.floor(Math.random() * 6) * Math.PI / 2,
-      y: Math.PI * 2 * rotations + Math.floor(Math.random() * 6) * Math.PI / 2,
-      z: Math.PI * 2 * rotations + Math.floor(Math.random() * 6) * Math.PI / 2
+      x: fullRotations + baseRotation.x,
+      y: fullRotations + baseRotation.y,
+      z: fullRotations + baseRotation.z
     }
+
     console.log('Target rotation:', targetRotation)
     targetRotationRef.current = targetRotation
   }
