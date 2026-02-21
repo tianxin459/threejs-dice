@@ -150,7 +150,7 @@ function App() {
     })
   }
 
-  const createDot = (dice, dotGeometry, x, y, z, color) => {
+  const createDot = (dice, dotGeometry, x, y, z, color, face) => {
     const dotMaterial = createDotMaterial(color)
     const dot = new THREE.Mesh(dotGeometry, dotMaterial)
 
@@ -158,42 +158,44 @@ function App() {
     let surfaceX, surfaceY, surfaceZ
     const offset = 0.001
 
-    if (z > 0) {
-      // Front face (+Z)
-      surfaceX = x
-      surfaceY = y
-      surfaceZ = 1 + offset
-      dot.rotation.set(0, 0, 0)
-    } else if (z < 0) {
-      // Back face (-Z)
-      surfaceX = x
-      surfaceY = y
-      surfaceZ = -1 - offset
-      dot.rotation.set(Math.PI, 0, 0)
-    } else if (x > 0) {
-      // Right face (+X)
-      surfaceX = 1 + offset
-      surfaceY = y
-      surfaceZ = z
-      dot.rotation.set(0, Math.PI / 2, Math.PI / 2)
-    } else if (x < 0) {
-      // Left face (-X)
-      surfaceX = -1 - offset
-      surfaceY = y
-      surfaceZ = z
-      dot.rotation.set(0, -Math.PI / 2, -Math.PI / 2)
-    } else if (y > 0) {
-      // Top face (+Y)
-      surfaceX = x
-      surfaceY = 1 + offset
-      surfaceZ = z
-      dot.rotation.set(-Math.PI / 2, 0, 0)
-    } else if (y < 0) {
-      // Bottom face (-Y)
-      surfaceX = x
-      surfaceY = -1 - offset
-      surfaceZ = z
-      dot.rotation.set(Math.PI / 2, 0, 0)
+    // face 指定哪个面: 'front', 'back', 'left', 'right', 'top', 'bottom'
+    switch (face) {
+      case 'front': // +Z
+        surfaceX = x
+        surfaceY = y
+        surfaceZ = 1 + offset
+        dot.rotation.set(0, 0, 0)
+        break
+      case 'back': // -Z
+        surfaceX = x
+        surfaceY = y
+        surfaceZ = -1 - offset
+        dot.rotation.set(Math.PI, 0, 0)
+        break
+      case 'right': // +X
+        surfaceX = 1 + offset
+        surfaceY = y
+        surfaceZ = z
+        dot.rotation.set(0, Math.PI / 2, Math.PI / 2)
+        break
+      case 'left': // -X
+        surfaceX = -1 - offset
+        surfaceY = y
+        surfaceZ = z
+        dot.rotation.set(0, -Math.PI / 2, -Math.PI / 2)
+        break
+      case 'top': // +Y
+        surfaceX = x
+        surfaceY = 1 + offset
+        surfaceZ = z
+        dot.rotation.set(-Math.PI / 2, 0, 0)
+        break
+      case 'bottom': // -Y
+        surfaceX = x
+        surfaceY = -1 - offset
+        surfaceZ = z
+        dot.rotation.set(Math.PI / 2, 0, 0)
+        break
     }
 
     dot.position.set(surfaceX, surfaceY, surfaceZ)
@@ -204,37 +206,37 @@ function App() {
     const darkColor = 0x1e293b
 
     // Face 1 - 1 dot (RED) - Front face (+Z)
-    createDot(dice, dotGeometry, 0, 0, 1, 0xef4444)
+    createDot(dice, dotGeometry, 0, 0, 0, 0xef4444, 'front')
 
     // Face 6 - 6 dots - Back face (-Z)
-    createDot(dice, dotGeometry, -0.5, 0.5, -1, darkColor)
-    createDot(dice, dotGeometry, 0.5, 0.5, -1, darkColor)
-    createDot(dice, dotGeometry, -0.5, -0.5, -1, darkColor)
-    createDot(dice, dotGeometry, 0.5, -0.5, -1, darkColor)
-    createDot(dice, dotGeometry, -0.5, 0, -1, darkColor)
-    createDot(dice, dotGeometry, 0.5, 0, -1, darkColor)
+    createDot(dice, dotGeometry, -0.5, 0.5, 0, darkColor, 'back')
+    createDot(dice, dotGeometry, 0.5, 0.5, 0, darkColor, 'back')
+    createDot(dice, dotGeometry, -0.5, -0.5, 0, darkColor, 'back')
+    createDot(dice, dotGeometry, 0.5, -0.5, 0, darkColor, 'back')
+    createDot(dice, dotGeometry, -0.5, 0, 0, darkColor, 'back')
+    createDot(dice, dotGeometry, 0.5, 0, 0, darkColor, 'back')
 
     // Face 2 - 2 dots - Left face (-X)
-    createDot(dice, dotGeometry, -1, 0.5, -0.5, darkColor)
-    createDot(dice, dotGeometry, -1, -0.5, 0.5, darkColor)
+    createDot(dice, dotGeometry, 0, 0.5, -0.5, darkColor, 'left')
+    createDot(dice, dotGeometry, 0, -0.5, 0.5, darkColor, 'left')
 
     // Face 5 - 5 dots - Right face (+X)
-    createDot(dice, dotGeometry, 1, 0.5, -0.5, darkColor)
-    createDot(dice, dotGeometry, 1, -0.5, 0.5, darkColor)
-    createDot(dice, dotGeometry, 1, 0, 0, darkColor)
-    createDot(dice, dotGeometry, 1, 0.5, 0.5, darkColor)
-    createDot(dice, dotGeometry, 1, -0.5, -0.5, darkColor)
+    createDot(dice, dotGeometry, 0, 0.5, -0.5, darkColor, 'right')
+    createDot(dice, dotGeometry, 0, -0.5, 0.5, darkColor, 'right')
+    createDot(dice, dotGeometry, 0, 0, 0, darkColor, 'right')
+    createDot(dice, dotGeometry, 0, 0.5, 0.5, darkColor, 'right')
+    createDot(dice, dotGeometry, 0, -0.5, -0.5, darkColor, 'right')
 
     // Face 3 - 3 dots - Top face (+Y)
-    createDot(dice, dotGeometry, 0, 1, 0, darkColor)
-    createDot(dice, dotGeometry, -0.5, 1, -0.5, darkColor)
-    createDot(dice, dotGeometry, 0.5, 1, 0.5, darkColor)
+    createDot(dice, dotGeometry, 0, 0, 0, darkColor, 'top')
+    createDot(dice, dotGeometry, -0.5, 0, -0.5, darkColor, 'top')
+    createDot(dice, dotGeometry, 0.5, 0, 0.5, darkColor, 'top')
 
     // Face 4 - 4 dots - Bottom face (-Y)
-    createDot(dice, dotGeometry, -0.5, -1, -0.5, darkColor)
-    createDot(dice, dotGeometry, 0.5, -1, 0.5, darkColor)
-    createDot(dice, dotGeometry, -0.5, -1, 0.5, darkColor)
-    createDot(dice, dotGeometry, 0.5, -1, -0.5, darkColor)
+    createDot(dice, dotGeometry, -0.5, 0, -0.5, darkColor, 'bottom')
+    createDot(dice, dotGeometry, 0.5, 0, 0.5, darkColor, 'bottom')
+    createDot(dice, dotGeometry, -0.5, 0, 0.5, darkColor, 'bottom')
+    createDot(dice, dotGeometry, 0.5, 0, -0.5, darkColor, 'bottom')
   }
 
   const animate = () => {
