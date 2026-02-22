@@ -24,6 +24,7 @@ function App() {
   const finalFaceRef = useRef(null) // 存储最终的面
 
   useEffect(() => {
+    console.log('Three.js Dice v1.0.0 - build #15 - 新功能已加载: 1秒滚动、结果显示、overflow-hidden')
     // Load version
     fetch('/version.json')
       .then(res => res.json())
@@ -359,6 +360,8 @@ function App() {
         })
     }
   }
+
+  console.log('App渲染 - isRolling:', isRolling, 'resultFace:', resultFace)
 
   return (
     <div
