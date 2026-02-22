@@ -20,7 +20,7 @@ function App() {
   const targetRotationRef = useRef({ x: 0, y: 0, z: 0 })
   const animationIdRef = useRef(null)
   const rollStartTimeRef = useRef(null)
-  const rollDurationRef = useRef(1000) // 1秒滚动时间
+  const rollDurationRef = useRef(1000) // 1秒滚动时间 - build #8
   const finalFaceRef = useRef(null) // 存储最终的面
 
   useEffect(() => {
