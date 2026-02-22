@@ -16,10 +16,11 @@ function App() {
 
   // Rolling state
   const [isRolling, setIsRolling] = useState(false)
+  const [resultFace, setResultFace] = useState(null)
   const targetRotationRef = useRef({ x: 0, y: 0, z: 0 })
   const animationIdRef = useRef(null)
   const rollStartTimeRef = useRef(null)
-  const rollDurationRef = useRef(2000) // 2秒滚动时间
+  const rollDurationRef = useRef(1000) // 1秒滚动时间
   const finalFaceRef = useRef(null) // 存储最终的面
 
   useEffect(() => {
@@ -294,6 +295,7 @@ function App() {
             console.log('Rolling finished, face:', finalFaceRef.current)
             dice.userData.isRolling = false
             setIsRolling(false)
+            setResultFace(finalFaceRef.current)
           }
         }
       }
@@ -361,7 +363,7 @@ function App() {
   return (
     <div
       ref={containerRef}
-      className="w-screen h-screen flex items-center justify-center relative bg-slate-900 cursor-pointer"
+      className="w-screen h-screen flex items-center justify-center relative bg-slate-900 cursor-pointer overflow-hidden"
       onClick={handleRollDice}
     >
       {/* Version display in top-left corner */}
@@ -372,9 +374,23 @@ function App() {
       )}
 
       {/* Title */}
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-white text-2xl font-light tracking-wider pointer-events-none z-10">
+      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-white text-2xl font-light tracking-wider pointer-events-none z-10 select-none">
         骰子-点击投掷
       </div>
+
+      {/* Result display */}
+      {!isRolling && resultFace !== null && (
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-white text-6xl font-bold pointer-events-none z-10 select-none animate-bounce">
+          {resultFace}
+        </div>
+      )}
+
+      {/* Instruction */}
+      {isRolling && (
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-white/60 text-lg pointer-events-none z-10 select-none">
+          滚动中...
+        </div>
+      )}
 
       {/* Error display */}
       {showError && (
