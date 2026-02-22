@@ -265,7 +265,10 @@ function App() {
     const animateLoop = () => {
       animationIdRef.current = requestAnimationFrame(animateLoop)
 
-      if (dice && isRolling) {
+      // 直接使用 ref 而不是 state，避免闭包问题
+      const isRollingState = diceRef.current?.userData?.isRolling || false
+
+      if (dice && isRollingState) {
         const currentTime = Date.now()
         const elapsed = currentTime - rollStartTimeRef.current
 
@@ -288,6 +291,7 @@ function App() {
 
           if (diffX < 0.01 && diffY < 0.01 && diffZ < 0.01) {
             console.log('Rolling finished, face:', finalFaceRef.current)
+            dice.userData.isRolling = false
             setIsRolling(false)
           }
         }
@@ -311,6 +315,11 @@ function App() {
     console.log('Starting roll...')
     setIsRolling(true)
     rollStartTimeRef.current = Date.now()
+
+    // 使用 userData 存储状态，避免闭包问题
+    if (diceRef.current) {
+      diceRef.current.userData.isRolling = true
+    }
 
     // 随机选择一个面 (1-6)
     const face = Math.floor(Math.random() * 6) + 1
