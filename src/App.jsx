@@ -18,6 +18,9 @@ function App() {
   const [isRolling, setIsRolling] = useState(false)
   const targetRotationRef = useRef({ x: 0, y: 0, z: 0 })
   const animationIdRef = useRef(null)
+  const rollStartTimeRef = useRef(null)
+  const rollDurationRef = useRef(2000) // 2秒滚动时间
+  const finalFaceRef = useRef(null) // 存储最终的面
 
   useEffect(() => {
     // Load version
@@ -263,20 +266,30 @@ function App() {
       animationIdRef.current = requestAnimationFrame(animateLoop)
 
       if (dice && isRolling) {
-        const target = targetRotationRef.current
-        dice.rotation.x += (target.x - dice.rotation.x) * 0.08
-        dice.rotation.y += (target.y - dice.rotation.y) * 0.08
-        dice.rotation.z += (target.z - dice.rotation.z) * 0.08
+        const currentTime = Date.now()
+        const elapsed = currentTime - rollStartTimeRef.current
 
-        const diffX = Math.abs(target.x - dice.rotation.x)
-        const diffY = Math.abs(target.y - dice.rotation.y)
-        const diffZ = Math.abs(target.z - dice.rotation.z)
+        if (elapsed < rollDurationRef.current) {
+          // 前2秒：快速旋转（模拟投掷）
+          const speed = 0.15 // 旋转速度
+          dice.rotation.x += speed
+          dice.rotation.y += speed
+          dice.rotation.z += speed * 0.5
+        } else {
+          // 2秒后：平滑过渡到最终面
+          const target = targetRotationRef.current
+          dice.rotation.x += (target.x - dice.rotation.x) * 0.1
+          dice.rotation.y += (target.y - dice.rotation.y) * 0.1
+          dice.rotation.z += (target.z - dice.rotation.z) * 0.1
 
-        console.log('Rotation diff:', { x: diffX, y: diffY, z: diffZ })
+          const diffX = Math.abs(target.x - dice.rotation.x)
+          const diffY = Math.abs(target.y - dice.rotation.y)
+          const diffZ = Math.abs(target.z - dice.rotation.z)
 
-        if (diffX < 0.01 && diffY < 0.01 && diffZ < 0.01) {
-          console.log('Rolling finished')
-          setIsRolling(false)
+          if (diffX < 0.01 && diffY < 0.01 && diffZ < 0.01) {
+            console.log('Rolling finished, face:', finalFaceRef.current)
+            setIsRolling(false)
+          }
         }
       }
 
@@ -297,23 +310,18 @@ function App() {
 
     console.log('Starting roll...')
     setIsRolling(true)
+    rollStartTimeRef.current = Date.now()
 
     // 随机选择一个面 (1-6)
     const face = Math.floor(Math.random() * 6) + 1
+    finalFaceRef.current = face
     console.log('Target face:', face)
 
     // 获取该面朝前的目标旋转
     const baseRotation = getRotationForFace(face)
 
-    // 添加额外的旋转以产生投掷效果
-    const rotations = Math.floor(Math.random() * 2) + 2 // 2-3 圈
-    const fullRotations = rotations * Math.PI * 2
-
-    const targetRotation = {
-      x: fullRotations + baseRotation.x,
-      y: fullRotations + baseRotation.y,
-      z: fullRotations + baseRotation.z
-    }
+    // 不需要额外旋转，2秒后才设置目标
+    const targetRotation = baseRotation
 
     console.log('Target rotation:', targetRotation)
     targetRotationRef.current = targetRotation
