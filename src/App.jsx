@@ -273,11 +273,12 @@ function App() {
         const elapsed = currentTime - rollStartTimeRef.current
 
         if (elapsed < rollDurationRef.current) {
-          // 前2秒：快速旋转（模拟投掷）
-          const speed = 0.15 // 旋转速度
-          dice.rotation.x += speed
+          // 前2秒：从右往左快速旋转（模拟真实骰子）
+          const speed = 1.5 // 旋转速度（原0.15的10倍）
+          // 只绕一个轴旋转，模拟真实投掷
+          dice.rotation.x += speed * 0.5
           dice.rotation.y += speed
-          dice.rotation.z += speed * 0.5
+          dice.rotation.z += speed * 0.3
         } else {
           // 2秒后：平滑过渡到最终面
           const target = targetRotationRef.current
