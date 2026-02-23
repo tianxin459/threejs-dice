@@ -1,6 +1,7 @@
 {
   "name": "threejs-dice",
   "version": "1.0.0",
+  "packageManager": "pnpm@9.15.4",
   "description": "Three.js Dice Demo - React Version",
   "scripts": {
     "dev": "vite",
