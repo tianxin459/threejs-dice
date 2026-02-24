@@ -239,12 +239,12 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     // Rotations to make the result face point UP (+Y direction)
     // Face layout: 1=front(+Z), 6=back(-Z), 2=left(-X), 5=right(+X), 3=top(+Y), 4=bottom(-Y)
     const faceRotations = {
-      1: { x: -Math.PI / 2, y: 0, z: 0 },        // front(+Z) rotated up to +Y
-      6: { x: Math.PI / 2, y: 0, z: 0 },          // back(-Z) rotated up to +Y
-      2: { x: 0, y: 0, z: Math.PI / 2 },           // left(-X) rotated up to +Y
-      5: { x: 0, y: 0, z: -Math.PI / 2 },          // right(+X) rotated up to +Y
-      3: { x: 0, y: 0, z: 0 },                     // top(+Y) already facing up
-      4: { x: Math.PI, y: 0, z: 0 },               // bottom(-Y) flipped to face up
+      1: { x: -Math.PI / 2, y: 0, z: 0 }, // Face 1 (+Z) -> needs -90 X to point Up (+Y)
+      6: { x: Math.PI / 2, y: 0, z: 0 },  // Face 6 (-Z) -> needs +90 X to point Up (+Y)
+      2: { x: 0, y: 0, z: -Math.PI / 2 }, // Face 2 (-X) -> needs -90 Z to point Up (+Y)
+      5: { x: 0, y: 0, z: Math.PI / 2 },  // Face 5 (+X) -> needs +90 Z to point Up (+Y)
+      3: { x: 0, y: 0, z: 0 },            // Face 3 (+Y) -> already Up (+Y)
+      4: { x: Math.PI, y: 0, z: 0 }       // Face 4 (-Y) -> needs 180 X to point Up (+Y)
     }
     return faceRotations[face]
   }
