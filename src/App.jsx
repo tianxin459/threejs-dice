@@ -75,6 +75,9 @@ function App() {
         </div>
       </header>
 
+      {/* Result display - top area */}
+      <DiceResult result={result} isRolling={isRolling} />
+
       {/* 3D Dice Scene - full screen */}
       <DiceScene onRollStart={handleRollStart} onRollEnd={handleRollEnd} />
 
