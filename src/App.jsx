@@ -81,22 +81,47 @@ function App() {
       {/* Result display - centered */}
       <DiceResult result={result} isRolling={isRolling} />
 
-      {/* Bottom stats bar */}
+      {/* Bottom recent results strip */}
       <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-        <div className="flex items-center justify-center gap-8 px-6 py-5">
+        <div className="flex flex-col items-center gap-2 px-4 pb-6 pt-3">
+          {/* Label */}
+          <span className="text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
+            {totalRolls > 0 ? `Recent ${Math.min(totalRolls, 10)} of ${totalRolls}` : 'No rolls yet'}
+          </span>
+          {/* Results row */}
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs uppercase tracking-wider">Rolls</span>
-            <span className="text-foreground/90 text-sm font-mono font-medium">{totalRolls}</span>
-          </div>
-          <div className="w-px h-3 bg-border" />
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs uppercase tracking-wider">Average</span>
-            <span className="text-foreground/90 text-sm font-mono font-medium">{average}</span>
-          </div>
-          <div className="w-px h-3 bg-border" />
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs uppercase tracking-wider">Last</span>
-            <span className="text-primary text-sm font-mono font-medium">{result ?? '—'}</span>
+            {totalRolls === 0 ? (
+              <div className="flex items-center gap-2">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-9 h-9 rounded-lg bg-card border border-border flex items-center justify-center"
+                  >
+                    <span className="text-muted-foreground/30 text-sm font-mono">-</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              history.slice(0, 10).map((item, i) => (
+                <div
+                  key={`${totalRolls}-${i}`}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300
+                    ${i === 0
+                      ? 'bg-primary/15 border-2 border-primary/50 scale-110'
+                      : 'bg-card border border-border'
+                    }
+                    ${i > 0 ? 'animate-fade-in-up' : 'animate-result-pop'}
+                  `}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                >
+                  <span className={`text-sm font-mono font-semibold ${
+                    i === 0 ? 'text-primary' : 'text-foreground/70'
+                  } ${item.face === 1 ? '!text-red-400' : ''}`}>
+                    {item.face}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

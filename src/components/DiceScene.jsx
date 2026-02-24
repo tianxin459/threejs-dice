@@ -349,17 +349,17 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
 
       {/* Roll button - bottom center */}
       <button
-        className={`absolute bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-auto transition-all duration-300 select-none
+        className={`absolute bottom-32 left-1/2 -translate-x-1/2 z-50 pointer-events-auto transition-all duration-300 select-none
           ${buttonState === 'stop'
-            ? 'px-6 py-3 rounded-full bg-foreground/10 border border-foreground/20 text-foreground/70 hover:bg-foreground/15 backdrop-blur-sm'
-            : 'px-8 py-3 rounded-full bg-primary/90 border border-primary text-primary-foreground font-medium hover:bg-primary animate-pulse-glow backdrop-blur-sm'
+            ? 'w-20 h-20 rounded-full bg-foreground/10 border-2 border-foreground/20 text-foreground/70 hover:bg-foreground/15 backdrop-blur-md'
+            : 'w-20 h-20 rounded-full bg-primary/90 border-2 border-primary text-primary-foreground font-semibold hover:bg-primary animate-pulse-glow backdrop-blur-md shadow-lg shadow-primary/20'
           }`}
         onClick={(e) => {
           e.stopPropagation()
           handleRoll()
         }}
       >
-        <span className="text-sm tracking-wider uppercase">
+        <span className="text-base tracking-wider uppercase">
           {buttonState === 'stop' ? 'Stop' : 'Roll'}
         </span>
       </button>
