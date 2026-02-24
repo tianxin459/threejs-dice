@@ -61,7 +61,7 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.2
+    renderer.toneMappingExposure = 1.6
 
     while (containerRef.current.firstChild) {
       containerRef.current.removeChild(containerRef.current.firstChild)
@@ -84,11 +84,11 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     scene.add(ground)
 
     // Lighting - warm premium feel
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
     scene.add(ambientLight)
 
     // Key light - warm golden spotlight from above
-    const spotLight = new THREE.SpotLight(0xf5e6c8, 1.5)
+    const spotLight = new THREE.SpotLight(0xf5e6c8, 2.5)
     spotLight.position.set(2, 12, 4)
     spotLight.angle = Math.PI / 5
     spotLight.penumbra = 0.5
@@ -103,12 +103,12 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     scene.add(spotLight)
 
     // Fill light - subtle cool from the side
-    const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.3)
+    const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.7)
     fillLight.position.set(-5, 3, -3)
     scene.add(fillLight)
 
     // Rim light - subtle warm edge
-    const rimLight = new THREE.PointLight(0xc8a96e, 0.4, 20)
+    const rimLight = new THREE.PointLight(0xc8a96e, 0.8, 20)
     rimLight.position.set(5, 2, -5)
     scene.add(rimLight)
 
@@ -238,13 +238,18 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   const getRotationForFace = (face) => {
     // Rotations to make the result face point UP (+Y direction)
     // Face layout: 1=front(+Z), 6=back(-Z), 2=left(-X), 5=right(+X), 3=top(+Y), 4=bottom(-Y)
+    // In Three.js right-hand coordinate system:
+    //   Rotate X by -90: +Z goes to +Y (front face up)
+    //   Rotate X by +90: -Z goes to +Y (back face up)
+    //   Rotate Z by +90: -X goes to +Y (left face up)
+    //   Rotate Z by -90: +X goes to +Y (right face up)
     const faceRotations = {
-      1: { x: -Math.PI / 2, y: 0, z: 0 }, // Face 1 (+Z) -> needs -90 X to point Up (+Y)
-      6: { x: Math.PI / 2, y: 0, z: 0 },  // Face 6 (-Z) -> needs +90 X to point Up (+Y)
-      2: { x: 0, y: 0, z: -Math.PI / 2 }, // Face 2 (-X) -> needs -90 Z to point Up (+Y)
-      5: { x: 0, y: 0, z: Math.PI / 2 },  // Face 5 (+X) -> needs +90 Z to point Up (+Y)
-      3: { x: 0, y: 0, z: 0 },            // Face 3 (+Y) -> already Up (+Y)
-      4: { x: Math.PI, y: 0, z: 0 }       // Face 4 (-Y) -> needs 180 X to point Up (+Y)
+      1: { x: -Math.PI / 2, y: 0, z: 0 },  // Face 1 on +Z -> rotate X -90 -> +Z face points up
+      6: { x: Math.PI / 2, y: 0, z: 0 },   // Face 6 on -Z -> rotate X +90 -> -Z face points up
+      2: { x: 0, y: 0, z: Math.PI / 2 },    // Face 2 on -X -> rotate Z +90 -> -X face points up
+      5: { x: 0, y: 0, z: -Math.PI / 2 },   // Face 5 on +X -> rotate Z -90 -> +X face points up
+      3: { x: 0, y: 0, z: 0 },              // Face 3 on +Y -> already pointing up
+      4: { x: Math.PI, y: 0, z: 0 },        // Face 4 on -Y -> rotate X 180 -> -Y face points up
     }
     return faceRotations[face]
   }
