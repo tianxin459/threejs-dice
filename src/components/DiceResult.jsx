@@ -37,29 +37,7 @@ export function DiceFace({ value, size = 80 }) {
 
 export default function DiceResult({ result, isRolling }) {
   if (isRolling) {
-    return (
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex gap-1">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-primary"
-                style={{
-                  animation: `pulse 1s ease-in-out ${i * 0.15}s infinite`,
-                }}
-              />
-            ))}
-          </div>
-          <style>{`
-            @keyframes pulse {
-              0%, 100% { opacity: 0.3; transform: scale(1); }
-              50% { opacity: 1; transform: scale(1.5); }
-            }
-          `}</style>
-        </div>
-      </div>
-    )
+    return null
   }
 
   if (result === null) {
