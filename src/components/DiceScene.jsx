@@ -232,12 +232,12 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
 
   const getRotationForFace = (face) => {
     const faceRotations = {
-      1: { x: 0, y: 0, z: 0 },
-      6: { x: Math.PI, y: 0, z: 0 },
-      2: { x: 0, y: Math.PI / 2, z: 0 },
-      5: { x: 0, y: -Math.PI / 2, z: 0 },
-      3: { x: Math.PI / 2, y: 0, z: 0 },
-      4: { x: -Math.PI / 2, y: 0, z: 0 }
+      1: { x: -Math.PI / 2, y: 0, z: 0 }, // Face 1 (+Z) -> needs -90 X to point Up (+Y)
+      6: { x: Math.PI / 2, y: 0, z: 0 },  // Face 6 (-Z) -> needs +90 X to point Up (+Y)
+      2: { x: 0, y: 0, z: -Math.PI / 2 }, // Face 2 (-X) -> needs -90 Z to point Up (+Y)
+      5: { x: 0, y: 0, z: Math.PI / 2 },  // Face 5 (+X) -> needs +90 Z to point Up (+Y)
+      3: { x: 0, y: 0, z: 0 },            // Face 3 (+Y) -> already Up (+Y)
+      4: { x: Math.PI, y: 0, z: 0 }       // Face 4 (-Y) -> needs 180 X to point Up (+Y)
     }
     return faceRotations[face]
   }
