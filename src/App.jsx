@@ -78,8 +78,7 @@ function App() {
       {/* 3D Dice Scene - full screen */}
       <DiceScene onRollStart={handleRollStart} onRollEnd={handleRollEnd} />
 
-      {/* Result display - centered */}
-      <DiceResult result={result} isRolling={isRolling} />
+
 
       {/* Bottom recent results strip */}
       <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
