@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import * as THREE from 'three'
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 
 export default function DiceScene({ onRollStart, onRollEnd }) {
   const containerRef = useRef(null)
@@ -92,11 +93,14 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     scene.add(directionalLight)
 
     // Dice
-    const diceGeometry = new THREE.BoxGeometry(2, 2, 2)
+    // 使用 RoundedBoxGeometry 创建圆角骰子
+    // width=2, height=2, depth=2, segments=8, radius=0.25
+    const diceGeometry = new RoundedBoxGeometry(2, 2, 2, 8, 0.25)
+    // 材质调整：更加光滑，接近图标质感
     const diceMaterial = new THREE.MeshPhongMaterial({
       color: 0xffffff,
-      specular: 0x444444,
-      shininess: 50
+      specular: 0xcccccc,
+      shininess: 100
     })
     const dice = new THREE.Mesh(diceGeometry, diceMaterial)
     dice.castShadow = true
@@ -131,9 +135,11 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   }
 
   const createDotMaterial = (color) => {
-    return new THREE.MeshBasicMaterial({
+    return new THREE.MeshPhongMaterial({
       color: color,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      shininess: 30,
+      specular: 0x111111
     })
   }
 
@@ -256,50 +262,72 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
         if (dice && dice.userData && dice.userData.isRolling) {
           // 如果没有被要求停止，就一直旋转
           if (!dice.userData.shouldStop) {
-            // 持续旋转阶段
-            const speed = 0.1 // 基础速度
+            // 持续旋转阶段 - 全部为正向旋转
+            const speed = 0.15 // 稍微提升基础速度
             dice.rotation.x += speed * 1.5
+            // Y 轴主旋转 (水平旋转)
             dice.rotation.y += speed * 2.0
             dice.rotation.z += speed * 1.2
           } else {
             // 停止阶段：平滑过渡到目标面
             const target = targetRotationRef.current
+            const pi2 = Math.PI * 2
             
-            // 辅助函数：计算两个角度之间的最短距离（考虑到 2PI 周期性）
-            const getShortestAngleDistance = (current, target) => {
-              const diff = (target - current) % (Math.PI * 2)
-              if (diff > Math.PI) return diff - Math.PI * 2
-              if (diff < -Math.PI) return diff + Math.PI * 2
+            // 辅助函数：计算两个角度之间的对齐距离（确保只正向旋转 - 从左到右）
+            const getForwardAngleDistance = (current, target) => {
+              // 当前角度
+              let currentMod = current % pi2
+              if (currentMod < 0) currentMod += pi2
+              
+              // 目标角度
+              let targetMod = target % pi2
+              if (targetMod < 0) targetMod += pi2
+              
+              let diff = targetMod - currentMod
+              
+              // 必须是正数（向前），如果目标在后面，加一圈
+              if (diff <= 0) {
+                diff += pi2
+              }
+              
               return diff
             }
   
-            // 计算每一轴的最短旋转距离
-            const diffX = getShortestAngleDistance(dice.rotation.x, target.x)
-            const diffY = getShortestAngleDistance(dice.rotation.y, target.y)
-            const diffZ = getShortestAngleDistance(dice.rotation.z, target.z)
+            // 计算每一轴的向前旋转距离
+            const diffX = getForwardAngleDistance(dice.rotation.x, target.x)
+            const diffY = getForwardAngleDistance(dice.rotation.y, target.y)
+            const diffZ = getForwardAngleDistance(dice.rotation.z, target.z)
   
-            // 平滑过渡到目标角度 (lerp)，增加对齐速度
-            dice.rotation.x += diffX * 0.15
-            dice.rotation.y += diffY * 0.15
-            dice.rotation.z += diffZ * 0.15
+            // 平滑过渡到目标角度 (lerp)，使用非常平缓的系数
+            // 使用系数 0.05 会让它最后转几圈才停下，看起来像惯性刹车
+            dice.rotation.x += diffX * 0.08
+            dice.rotation.y += diffY * 0.08
+            dice.rotation.z += diffZ * 0.08
   
-            const isClose = (d) => Math.abs(d) < 0.05
+            const isClose = (d) => d < 0.05 // 使用单向判断
             
-            // 如果接近目标，直接锁定并结束动画
+            // 如果非常接近目标
             if (isClose(diffX) && isClose(diffY) && isClose(diffZ)) {
-              // 确保完全对齐（保持当前旋转周期）
-              const roundToTarget = (current, target) => {
-                 return target + Math.round((current - target) / (Math.PI * 2)) * (Math.PI * 2)
+              // 确保完全对齐（向前对齐）
+              const alignToGrid = (val, targetVal) => {
+                 let currentPoints = Math.floor(val / pi2)
+                 // 目标应该是下一圈的对应角度
+                 return (currentPoints * pi2) + targetVal + (targetVal < (val % pi2) ? pi2 : 0)
+                 // 实际上这步有点复杂，直接设置为目标角度加圈数即可
+                 // 简单方法：既然最后 diff 很小，直接加上 diff 就可以
+                 return val + getForwardAngleDistance(val, targetVal)
               }
   
-              dice.rotation.x = roundToTarget(dice.rotation.x, target.x)
-              dice.rotation.y = roundToTarget(dice.rotation.y, target.y)
-              dice.rotation.z = roundToTarget(dice.rotation.z, target.z)
+              // 最终修正，直接赋以最接近的未来值
+              // 由于 diff 是正向距离，直接加上即可
+              dice.rotation.x += diffX
+              dice.rotation.y += diffY
+              dice.rotation.z += diffZ
               
               dice.userData.isRolling = false
-              dice.userData.shouldStop = false // 重置状态
+              dice.userData.shouldStop = false 
               
-              setButtonState('start') // 动画结束后重置按钮状态
+              setButtonState('start') 
 
               if (onRollEnd) {
                 onRollEnd(finalFaceRef.current)
