@@ -1,7 +1,7 @@
 import React from 'react'
 
 // Dice face SVG representations
-function DiceFace({ value, size = 80 }) {
+export function DiceFace({ value, size = 80 }) {
   const dotPositions = {
     1: [[50, 50]],
     2: [[28, 28], [72, 72]],

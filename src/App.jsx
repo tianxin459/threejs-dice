@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import DiceScene from './components/DiceScene'
-import DiceResult from './components/DiceResult'
+import DiceResult, { DiceFace } from './components/DiceResult'
 import HistoryPanel from './components/HistoryPanel'
 
 function App() {
@@ -88,16 +88,13 @@ function App() {
           <span className="text-muted-foreground text-[10px] uppercase tracking-[0.2em]">
             {totalRolls > 0 ? `Recent ${Math.min(totalRolls, 10)} of ${totalRolls}` : 'No rolls yet'}
           </span>
-          {/* Results row */}
-          <div className="flex items-center gap-2">
+          {/* Results row - dice faces */}
+          <div className="flex items-center gap-1.5">
             {totalRolls === 0 ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-9 h-9 rounded-lg bg-card border border-border flex items-center justify-center"
-                  >
-                    <span className="text-muted-foreground/30 text-sm font-mono">-</span>
+                  <div key={i} className="opacity-20">
+                    <DiceFace value={i + 1} size={32} />
                   </div>
                 ))}
               </div>
@@ -105,20 +102,17 @@ function App() {
               history.slice(0, 10).map((item, i) => (
                 <div
                   key={`${totalRolls}-${i}`}
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300
-                    ${i === 0
-                      ? 'bg-primary/15 border-2 border-primary/50 scale-110'
-                      : 'bg-card border border-border'
-                    }
+                  className={`transition-all duration-300
+                    ${i === 0 ? 'scale-125 mx-1' : ''}
                     ${i > 0 ? 'animate-fade-in-up' : 'animate-result-pop'}
+                    ${i >= 5 ? 'hidden sm:block' : ''}
                   `}
-                  style={{ animationDelay: `${i * 30}ms` }}
+                  style={{
+                    animationDelay: `${i * 30}ms`,
+                    opacity: i === 0 ? 1 : Math.max(0.3, 1 - i * 0.08),
+                  }}
                 >
-                  <span className={`text-sm font-mono font-semibold ${
-                    i === 0 ? 'text-primary' : 'text-foreground/70'
-                  } ${item.face === 1 ? '!text-red-400' : ''}`}>
-                    {item.face}
-                  </span>
+                  <DiceFace value={item.face} size={i === 0 ? 36 : 32} />
                 </div>
               ))
             )}
