@@ -12,8 +12,6 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   const diceRef = useRef(null)
   const dotGeometryRef = useRef(null)
   const animationIdRef = useRef(null)
-  const rollStartTimeRef = useRef(null)
-  const rollDurationRef = useRef(1000) // 1秒滚动时间
   const targetRotationRef = useRef({ x: 0, y: 0, z: 0 })
   const finalFaceRef = useRef(null)
 
@@ -41,66 +39,88 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   }
 
   const init = () => {
-    // Scene
     const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x0a0a0c)
     sceneRef.current = scene
 
     // Camera
     const camera = new THREE.PerspectiveCamera(
-      75,
+      60,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     )
-    camera.position.set(-5, 5, 5)
+    camera.position.set(-4.5, 5, 5)
     camera.lookAt(0, 0, 0)
     cameraRef.current = camera
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFShadowMap
-    
-    // 清理旧的 canvas 防止重复添加
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.2
+
     while (containerRef.current.firstChild) {
       containerRef.current.removeChild(containerRef.current.firstChild)
     }
-    
+
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+    // Ground plane - subtle reflective surface
+    const groundGeometry = new THREE.PlaneGeometry(30, 30)
+    const groundMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0e0e12,
+      metalness: 0.3,
+      roughness: 0.8,
+    })
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial)
+    ground.rotation.x = -Math.PI / 2
+    ground.position.y = -1.5
+    ground.receiveShadow = true
+    scene.add(ground)
+
+    // Lighting - warm premium feel
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
     scene.add(ambientLight)
 
-    const spotLight = new THREE.SpotLight(0xffffff, 1)
-    spotLight.position.set(0, 15, 0)
-    spotLight.angle = Math.PI / 6
-    spotLight.penumbra = 0.3
+    // Key light - warm golden spotlight from above
+    const spotLight = new THREE.SpotLight(0xf5e6c8, 1.5)
+    spotLight.position.set(2, 12, 4)
+    spotLight.angle = Math.PI / 5
+    spotLight.penumbra = 0.5
     spotLight.decay = 2
-    spotLight.distance = 50
+    spotLight.distance = 40
     spotLight.castShadow = true
     spotLight.shadow.mapSize.width = 2048
     spotLight.shadow.mapSize.height = 2048
     spotLight.shadow.camera.near = 0.5
     spotLight.shadow.camera.far = 50
+    spotLight.shadow.bias = -0.001
     scene.add(spotLight)
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3)
-    directionalLight.position.set(5, 5, 5)
-    scene.add(directionalLight)
+    // Fill light - subtle cool from the side
+    const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.3)
+    fillLight.position.set(-5, 3, -3)
+    scene.add(fillLight)
 
-    // Dice
-    // 使用 RoundedBoxGeometry 创建圆角骰子
-    // width=2, height=2, depth=2, segments=8, radius=0.25
+    // Rim light - subtle warm edge
+    const rimLight = new THREE.PointLight(0xc8a96e, 0.4, 20)
+    rimLight.position.set(5, 2, -5)
+    scene.add(rimLight)
+
+    // Dice - premium ivory material
     const diceGeometry = new RoundedBoxGeometry(2, 2, 2, 8, 0.25)
-    // 材质调整：更加光滑，接近图标质感
-    const diceMaterial = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
-      specular: 0xcccccc,
-      shininess: 100
+    const diceMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf5f0e8,
+      metalness: 0.0,
+      roughness: 0.15,
+      clearcoat: 0.8,
+      clearcoatRoughness: 0.1,
+      reflectivity: 0.5,
     })
     const dice = new THREE.Mesh(diceGeometry, diceMaterial)
     dice.castShadow = true
@@ -117,13 +137,10 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     // Add dots
     createDots(dice, dotGeometry)
 
-    // 初始化目标角度为 0
     targetRotationRef.current = { x: 0, y: 0, z: 0 }
 
-    // Start animation
     animate()
 
-    // Window resize handler
     const handleResize = () => {
       if (cameraRef.current && rendererRef.current) {
         cameraRef.current.aspect = window.innerWidth / window.innerHeight
@@ -151,40 +168,28 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     const offset = 0.001
 
     switch (face) {
-      case 'front': // +Z
-        surfaceX = x
-        surfaceY = y
-        surfaceZ = 1 + offset
+      case 'front':
+        surfaceX = x; surfaceY = y; surfaceZ = 1 + offset
         dot.rotation.set(0, 0, 0)
         break
-      case 'back': // -Z
-        surfaceX = x
-        surfaceY = y
-        surfaceZ = -1 - offset
+      case 'back':
+        surfaceX = x; surfaceY = y; surfaceZ = -1 - offset
         dot.rotation.set(Math.PI, 0, 0)
         break
-      case 'right': // +X
-        surfaceX = 1 + offset
-        surfaceY = y
-        surfaceZ = z
+      case 'right':
+        surfaceX = 1 + offset; surfaceY = y; surfaceZ = z
         dot.rotation.set(0, Math.PI / 2, Math.PI / 2)
         break
-      case 'left': // -X
-        surfaceX = -1 - offset
-        surfaceY = y
-        surfaceZ = z
+      case 'left':
+        surfaceX = -1 - offset; surfaceY = y; surfaceZ = z
         dot.rotation.set(0, -Math.PI / 2, -Math.PI / 2)
         break
-      case 'top': // +Y
-        surfaceX = x
-        surfaceY = 1 + offset
-        surfaceZ = z
+      case 'top':
+        surfaceX = x; surfaceY = 1 + offset; surfaceZ = z
         dot.rotation.set(-Math.PI / 2, 0, 0)
         break
-      case 'bottom': // -Y
-        surfaceX = x
-        surfaceY = -1 - offset
-        surfaceZ = z
+      case 'bottom':
+        surfaceX = x; surfaceY = -1 - offset; surfaceZ = z
         dot.rotation.set(Math.PI / 2, 0, 0)
         break
     }
@@ -194,10 +199,10 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   }
 
   const createDots = (dice, dotGeometry) => {
-    const darkColor = 0x1e293b
+    const darkColor = 0x1a1a2e
 
-    // Face 1 - 1 dot (RED) - Front face (+Z)
-    createDot(dice, dotGeometry, 0, 0, 0, 0xef4444, 'front')
+    // Face 1 - 1 dot (accent red) - Front face (+Z)
+    createDot(dice, dotGeometry, 0, 0, 0, 0xc84444, 'front')
 
     // Face 6 - 6 dots - Back face (-Z)
     createDot(dice, dotGeometry, -0.5, 0.5, 0, darkColor, 'back')
@@ -231,6 +236,8 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   }
 
   const getRotationForFace = (face) => {
+    // Rotations to make the result face point UP (+Y direction)
+    // Face layout: 1=front(+Z), 6=back(-Z), 2=left(-X), 5=right(+X), 3=top(+Y), 4=bottom(-Y)
     const faceRotations = {
       1: { x: -Math.PI / 2, y: 0, z: 0 }, // Face 1 (+Z) -> needs -90 X to point Up (+Y)
       6: { x: Math.PI / 2, y: 0, z: 0 },  // Face 6 (-Z) -> needs +90 X to point Up (+Y)
@@ -243,7 +250,6 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
   }
 
   const animate = () => {
-    // 渲染器和场景引用
     const renderer = rendererRef.current
     const scene = sceneRef.current
     const camera = cameraRef.current
@@ -252,82 +258,49 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
 
     const animateLoop = () => {
       animationIdRef.current = requestAnimationFrame(animateLoop)
-      
-      // 每一帧都实时获取 dice，避免闭包引用旧对象（虽然 ref.current 应该是稳定的）
-      // 更重要的是，确保我们操作的是最新的 dice 实例
+
       const dice = diceRef.current
 
       if (renderer && scene && camera) {
-        // 先旋转，再渲染
         if (dice && dice.userData && dice.userData.isRolling) {
-          // 如果没有被要求停止，就一直旋转
           if (!dice.userData.shouldStop) {
-            // 持续旋转阶段 - 全部为正向旋转
-            const speed = 0.15 // 稍微提升基础速度
+            const speed = 0.15
             dice.rotation.x += speed * 1.5
-            // Y 轴主旋转 (水平旋转)
             dice.rotation.y += speed * 2.0
             dice.rotation.z += speed * 1.2
           } else {
-            // 停止阶段：平滑过渡到目标面
             const target = targetRotationRef.current
             const pi2 = Math.PI * 2
-            
-            // 辅助函数：计算两个角度之间的对齐距离（确保只正向旋转 - 从左到右）
+
             const getForwardAngleDistance = (current, target) => {
-              // 当前角度
               let currentMod = current % pi2
               if (currentMod < 0) currentMod += pi2
-              
-              // 目标角度
               let targetMod = target % pi2
               if (targetMod < 0) targetMod += pi2
-              
               let diff = targetMod - currentMod
-              
-              // 必须是正数（向前），如果目标在后面，加一圈
-              if (diff <= 0) {
-                diff += pi2
-              }
-              
+              if (diff <= 0) diff += pi2
               return diff
             }
-  
-            // 计算每一轴的向前旋转距离
+
             const diffX = getForwardAngleDistance(dice.rotation.x, target.x)
             const diffY = getForwardAngleDistance(dice.rotation.y, target.y)
             const diffZ = getForwardAngleDistance(dice.rotation.z, target.z)
-  
-            // 平滑过渡到目标角度 (lerp)，使用非常平缓的系数
-            // 使用系数 0.05 会让它最后转几圈才停下，看起来像惯性刹车
+
             dice.rotation.x += diffX * 0.08
             dice.rotation.y += diffY * 0.08
             dice.rotation.z += diffZ * 0.08
-  
-            const isClose = (d) => d < 0.05 // 使用单向判断
-            
-            // 如果非常接近目标
+
+            const isClose = (d) => d < 0.05
+
             if (isClose(diffX) && isClose(diffY) && isClose(diffZ)) {
-              // 确保完全对齐（向前对齐）
-              const alignToGrid = (val, targetVal) => {
-                 let currentPoints = Math.floor(val / pi2)
-                 // 目标应该是下一圈的对应角度
-                 return (currentPoints * pi2) + targetVal + (targetVal < (val % pi2) ? pi2 : 0)
-                 // 实际上这步有点复杂，直接设置为目标角度加圈数即可
-                 // 简单方法：既然最后 diff 很小，直接加上 diff 就可以
-                 return val + getForwardAngleDistance(val, targetVal)
-              }
-  
-              // 最终修正，直接赋以最接近的未来值
-              // 由于 diff 是正向距离，直接加上即可
               dice.rotation.x += diffX
               dice.rotation.y += diffY
               dice.rotation.z += diffZ
-              
+
               dice.userData.isRolling = false
-              dice.userData.shouldStop = false 
-              
-              setButtonState('start') 
+              dice.userData.shouldStop = false
+
+              setButtonState('start')
 
               if (onRollEnd) {
                 onRollEnd(finalFaceRef.current)
@@ -335,7 +308,7 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
             }
           }
         }
-        
+
         renderer.render(scene, camera)
       }
     }
@@ -343,61 +316,54 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     animateLoop()
   }
 
-  const [buttonState, setButtonState] = React.useState('start'); // 'start' | 'stop'
+  const [buttonState, setButtonState] = React.useState('start')
 
   const handleRoll = () => {
     if (diceRef.current) {
-      // 这里的逻辑：
-      // 1. 如果没在转，开始转 => 状态变为 'stop' (等待点击停止)
       if (!diceRef.current.userData.isRolling) {
-         if (onRollStart) onRollStart()
-         
-         diceRef.current.userData.isRolling = true
-         diceRef.current.userData.shouldStop = false
-         // rollStartTimeRef.current 此时其实不再用于 1s 倒计时，而是用于计算旋转增量（如果需要）
-         // 但我们现在的逻辑是无限旋转，所以只需要保证 animation loop 里 speed 增加即可
-         
-         setButtonState('stop')
+        if (onRollStart) onRollStart()
+
+        diceRef.current.userData.isRolling = true
+        diceRef.current.userData.shouldStop = false
+
+        setButtonState('stop')
       } else {
-         // 2. 如果正在转
-         // 如果还没进入"停止阶段" (shouldStop=false)，则触发停止
-         if (!diceRef.current.userData.shouldStop) {
-            diceRef.current.userData.shouldStop = true
-            
-            const face = Math.floor(Math.random() * 6) + 1
-            finalFaceRef.current = face
-            targetRotationRef.current = getRotationForFace(face)
-            
-            setButtonState('start')
-         }
+        if (!diceRef.current.userData.shouldStop) {
+          diceRef.current.userData.shouldStop = true
+
+          const face = Math.floor(Math.random() * 6) + 1
+          finalFaceRef.current = face
+          targetRotationRef.current = getRotationForFace(face)
+
+          setButtonState('start')
+        }
       }
     }
   }
 
-  // 监听 roll 结束事件来重置按钮状态（防止意外情况，虽然我们在上面应该已经处理了 setButtonState('start')）
-  // 实际上，当 shouldStop=true 后，动画还会持续一小会儿直到完全停稳 (isRolling=false)
-  // 我们的按钮状态反映的是"下一个动作是什么"。
-  // 点击"开始" -> 变"停止" -> 点击"停止" -> 变"开始"
-  // 所以上面的逻辑是正确的。当点击停止时，虽然物理上骰子还在减速，但在用户意图上，下一个动作只能是重新开始。
-
   return (
     <div className="w-full h-full relative">
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="w-full h-full cursor-pointer"
-        onClick={() => {
-           handleRoll() 
-        }} 
+        onClick={() => handleRoll()}
       />
-      
-      <button 
-        className="absolute bottom-10 right-10 z-50 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded backdrop-blur border border-white/20 pointer-events-auto transition-colors font-mono select-none"
+
+      {/* Roll button - bottom center */}
+      <button
+        className={`absolute bottom-32 left-1/2 -translate-x-1/2 z-50 pointer-events-auto transition-all duration-300 select-none
+          ${buttonState === 'stop'
+            ? 'w-20 h-20 rounded-full bg-foreground/10 border-2 border-foreground/20 text-foreground/70 hover:bg-foreground/15 backdrop-blur-md'
+            : 'w-20 h-20 rounded-full bg-primary/90 border-2 border-primary text-primary-foreground font-semibold hover:bg-primary animate-pulse-glow backdrop-blur-md shadow-lg shadow-primary/20'
+          }`}
         onClick={(e) => {
           e.stopPropagation()
           handleRoll()
         }}
       >
-        {buttonState === 'stop' ? "停止转动 (STOP)" : "开始转动 (START)"}
+        <span className="text-base tracking-wider uppercase">
+          {buttonState === 'stop' ? 'Stop' : 'Roll'}
+        </span>
       </button>
     </div>
   )
