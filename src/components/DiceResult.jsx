@@ -1,12 +1,62 @@
 import React from 'react'
 
+// Dice face SVG representations
+function DiceFace({ value, size = 80 }) {
+  const dotPositions = {
+    1: [[50, 50]],
+    2: [[28, 28], [72, 72]],
+    3: [[28, 28], [50, 50], [72, 72]],
+    4: [[28, 28], [72, 28], [28, 72], [72, 72]],
+    5: [[28, 28], [72, 28], [50, 50], [28, 72], [72, 72]],
+    6: [[28, 28], [72, 28], [28, 50], [72, 50], [28, 72], [72, 72]],
+  }
+
+  const dots = dotPositions[value] || []
+  const isOne = value === 1
+
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      <rect
+        x="2" y="2" width="96" height="96" rx="16"
+        fill="rgba(255,255,255,0.06)"
+        stroke="rgba(200,169,110,0.3)"
+        strokeWidth="1.5"
+      />
+      {dots.map(([cx, cy], i) => (
+        <circle
+          key={i}
+          cx={cx}
+          cy={cy}
+          r={value <= 2 ? 10 : 8}
+          fill={isOne ? '#c8a96e' : '#e8e8ed'}
+        />
+      ))}
+    </svg>
+  )
+}
+
 export default function DiceResult({ result, isRolling }) {
   if (isRolling) {
     return (
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20">
-        <div className="animate-pulse">
-          <div className="text-6xl font-bold text-white/80">🎲</div>
-          <div className="text-center text-white/60 mt-2">滚动中...</div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-primary"
+                style={{
+                  animation: `pulse 1s ease-in-out ${i * 0.15}s infinite`,
+                }}
+              />
+            ))}
+          </div>
+          <style>{`
+            @keyframes pulse {
+              0%, 100% { opacity: 0.3; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.5); }
+            }
+          `}</style>
         </div>
       </div>
     )
@@ -14,20 +64,24 @@ export default function DiceResult({ result, isRolling }) {
 
   if (result === null) {
     return (
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20">
-        <div className="text-white/50 text-lg">点击投掷骰子</div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none select-none">
+        <p className="text-muted-foreground text-sm tracking-widest uppercase">
+          Click to roll
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20">
-      <div className="relative">
-        <div className="text-9xl font-black text-white animate-bounce drop-shadow-2xl">
-          {result}
-        </div>
-        <div className="absolute inset-0 text-9xl font-black text-yellow-400/30 blur-3xl -z-10">
-          {result}
+    <div className="absolute top-[15%] left-1/2 z-20 pointer-events-none select-none animate-result-appear"
+      style={{ transform: 'translate(-50%, -50%)' }}
+    >
+      <div className="flex flex-col items-center gap-4">
+        <DiceFace value={result} size={88} />
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-5xl font-bold text-foreground tracking-tight font-mono">
+            {result}
+          </span>
         </div>
       </div>
     </div>
