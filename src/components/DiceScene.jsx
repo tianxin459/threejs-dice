@@ -61,7 +61,7 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.2
+    renderer.toneMappingExposure = 1.6
 
     while (containerRef.current.firstChild) {
       containerRef.current.removeChild(containerRef.current.firstChild)
@@ -84,11 +84,11 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     scene.add(ground)
 
     // Lighting - warm premium feel
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
     scene.add(ambientLight)
 
     // Key light - warm golden spotlight from above
-    const spotLight = new THREE.SpotLight(0xf5e6c8, 1.5)
+    const spotLight = new THREE.SpotLight(0xf5e6c8, 2.5)
     spotLight.position.set(2, 12, 4)
     spotLight.angle = Math.PI / 5
     spotLight.penumbra = 0.5
@@ -103,12 +103,12 @@ export default function DiceScene({ onRollStart, onRollEnd }) {
     scene.add(spotLight)
 
     // Fill light - subtle cool from the side
-    const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.3)
+    const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.7)
     fillLight.position.set(-5, 3, -3)
     scene.add(fillLight)
 
     // Rim light - subtle warm edge
-    const rimLight = new THREE.PointLight(0xc8a96e, 0.4, 20)
+    const rimLight = new THREE.PointLight(0xc8a96e, 0.8, 20)
     rimLight.position.set(5, 2, -5)
     scene.add(rimLight)
 
