@@ -1,6 +1,6 @@
 {
   "name": "threejs-dice",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Three.js Dice Demo - React Version",
   "scripts": {
