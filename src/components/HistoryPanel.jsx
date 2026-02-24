@@ -33,14 +33,21 @@ export default function HistoryPanel({ history, show, onClose }) {
         />
       )}
 
-      {/* Panel */}
+      {/* Panel - bottom sheet on mobile, right panel on desktop */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-muted/95 backdrop-blur-xl border-l border-border z-40 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          show ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed z-40 bg-muted/95 backdrop-blur-xl border-border transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+          bottom-0 left-0 right-0 h-[50vh] rounded-t-2xl border-t
+          sm:top-0 sm:right-0 sm:left-auto sm:bottom-auto sm:h-full sm:w-80 sm:max-w-[85vw] sm:rounded-t-none sm:border-t-0 sm:border-l
+          ${show ? 'translate-y-0 sm:translate-y-0 sm:translate-x-0' : 'translate-y-full sm:translate-y-0 sm:translate-x-full'}
+        `}
       >
+        {/* Drag handle - mobile only */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-border" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-5 border-b border-border">
+        <div className="flex items-center justify-between px-5 py-3 sm:py-5 border-b border-border">
           <div>
             <h2 className="text-foreground text-sm font-medium">History</h2>
             <p className="text-muted-foreground text-xs mt-0.5">
@@ -59,7 +66,7 @@ export default function HistoryPanel({ history, show, onClose }) {
         </div>
 
         {/* Roll list */}
-        <div className="overflow-y-auto custom-scrollbar" style={{ height: 'calc(100% - 65px)' }}>
+        <div className="overflow-y-auto custom-scrollbar flex-1" style={{ height: 'calc(100% - 85px)' }}>
           {history.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-30 mb-3">
